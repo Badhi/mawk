@@ -1,18 +1,48 @@
-#include <boost/spirit/include/qi.hpp>
+#include <boost/program_options.hpp>
 #include <string>
+#include <vector>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
-using namespace boost::spirit;
+namespace po = boost::program_options;
 
-int main()
+int main(int argc, char ** argv)
 {
-    std::string s;
-    std::getline(std::cin, s);
-    auto it = s.begin();
-    bool match = qi::phrase_parse(it, s.end(), ascii::digit >> ascii::digit, ascii::space);
+    po::options_description desc("Allowed options");
 
-    std::cout << std::boolalpha << match << '\n';
+    desc.add_options()
+        ("FS", po::value<char>(), "Field separator")
+        ("f", po::value<std::string>(), "Script name")
+        ("help", "help") 
+    ;
 
-    if (it != s.end())
-        std::cout << std::string{it, s.end()} << '\n';
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);    
+
+    if (vm.count("help")) {
+        std::cout << desc << "\n";
+        return 1;
+    }
+
+    char fieldSeparator = ' ';
+    if (vm.count("FS")) {
+        fieldSeparator = vm["FS"].as<char>();
+    }
+
+    std::string phrase;
+    if(vm.count("f")){
+        std::ifstream scriptFile(vm["f"].as<std::string>());
+        std::stringstream s;
+        s << scriptFile.rdbuf();
+        phrase = s.str();
+    } 
+    else{
+        phrase = argv[argc-1];
+    } 
+
+    std::cout << "Field separator : " << fieldSeparator << std::endl;
+    std::cout << "Phrase : " << std::endl;
+    std::cout << phrase << std::endl;
 }
