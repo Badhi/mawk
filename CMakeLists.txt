@@ -1,13 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
+
 project(mawk)
 
-include_directories(/home/bhashitha/Downloads/boost_1_70_0/)
-
-link_directories(/home/bhashitha/Downloads/boost_1_70_0/stage/lib)
-
-add_executable(mawk
-    main.cpp)
-
-target_link_libraries(mawk
-        boost_program_options)
-
+add_subdirectory(src)
+add_subdirectory(test)
