@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.5)
 project(mawk)
 
 include_directories(/home/bhashitha/Downloads/boost_1_70_0/)
