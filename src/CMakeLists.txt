@@ -1,9 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
+
 project(mawk)
 
-include_directories(/home/bhashitha/Downloads/boost_1_70_0/)
+find_package(Boost 1.72.0 REQUIRED COMPONENTS
+                program_options)
 
-link_directories(/home/bhashitha/Downloads/boost_1_70_0/stage/lib)
+include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(mawk_core parser.cpp)
 
@@ -12,6 +14,6 @@ add_executable(mawk
     )
 
 target_link_libraries(mawk
-        boost_program_options)
+        Boost::program_options)
 
 
