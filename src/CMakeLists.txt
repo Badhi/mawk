@@ -14,6 +14,7 @@ add_executable(mawk
     )
 
 target_link_libraries(mawk
-        Boost::program_options)
+        Boost::program_options
+        mawk_core)
 
 

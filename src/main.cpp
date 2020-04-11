@@ -12,8 +12,9 @@ int main(int argc, char ** argv)
     po::options_description desc("Allowed options");
 
     desc.add_options()
-        ("FS", po::value<char>(), "Field separator")
-        ("f", po::value<std::string>(), "Script name")
+        ("field-separator,F", po::value<char>(), "Field separator")
+        ("file,f", po::value<std::string>(), "Script name")
+        ("val,v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script")
         ("help", "help") 
     ;
 
@@ -27,15 +28,20 @@ int main(int argc, char ** argv)
     }
 
     char fieldSeparator = ' ';
-    if (vm.count("FS")) {
-        fieldSeparator = vm["FS"].as<char>();
+    if (vm.count("F")) {
+        fieldSeparator = vm["F"].as<char>();
     }
 
     std::string phrase;
     if(vm.count("f")){
-        std::ifstream scriptFile(vm["f"].as<std::string>());
+        std::string script_file_name = vm["f"].as<std::string>();
+        std::ifstream script_file(script_file_name);
         std::stringstream s;
-        s << scriptFile.rdbuf();
+        if(!script_file.is_open()){
+            std::cerr << "Unable to open script file : " << script_file_name << std::endl; 
+            return 1;
+        }
+        s << script_file.rdbuf();
         phrase = s.str();
     } 
     else{
