@@ -7,13 +7,46 @@
 
 namespace po = boost::program_options;
 
+enum class OptionsIndex {
+    FIELD_SEPARATOR = 0,
+    SCRIPT_FILE,
+    VARIABLES,
+    END
+};
+
+class RunOptions{
+    private:
+        std::vector<std::string> value_key_store;
+        std::vector<std::string> value_store;
+        po::options_description desc;
+
+        RunOptions() : value_key_store(static_cast<unsigned int>(OptionsIndex::END)), value_store(static_cast<unsigned int>(OptionsIndex::END)), desc("Allowed options"){
+        }
+    public:
+        static RunOptions&  getInst() { 
+            static RunOptions options;
+            return options;
+        }
+
+        RunOptions & operator()(const char* option_name, const po::value_semantic * s, const char*  description, OptionsIndex index){
+            desc.add_options()(option_name, s, description);
+            value_key_store[static_cast<unsigned int>(index)] = option_name;
+            return *this;
+        }
+
+};
+
+#define ADD_OPTION(display_name, type, description, options_index) \
+    RunOptions::getInst()(display_name, tpe, description, options_index) 
+    
+    
+
 int main(int argc, char ** argv)
 {
-    po::options_description desc("Allowed options");
 
-    desc.add_options()
-        ("FS", po::value<char>(), "Field separator")
-        ("f", po::value<std::string>(), "Script name")
+    RunOptions::getInst()("field-separator,F", po::value<char>(), "Field separator")
+        ("file,f", po::value<std::string>(), "Script name")
+        ("val,v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script")
         ("help", "help") 
     ;
 
@@ -27,8 +60,8 @@ int main(int argc, char ** argv)
     }
 
     char fieldSeparator = ' ';
-    if (vm.count("FS")) {
-        fieldSeparator = vm["FS"].as<char>();
+    if (vm.count("F")) {
+        fieldSeparator = vm["F"].as<char>();
     }
 
     std::string phrase;
