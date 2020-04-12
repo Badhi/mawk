@@ -10,8 +10,9 @@ addons:
             - g++-9
 install:
     - wget https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
-    - tar xvf boost_1_72_0.tar.gz
+    - tar xf boost_1_72_0.tar.gz
     - cd boost_1_72_0
+    - ./bootstrap.sh
     - sudo ./b2 --with-program_options install
 
 script :
