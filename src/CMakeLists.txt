@@ -4,7 +4,7 @@ project(mawk)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS true)
 
-find_package(Boost 1.72.0 REQUIRED COMPONENTS
+find_package(Boost 1.67.0 REQUIRED COMPONENTS
                 program_options)
 
 include_directories(${Boost_INCLUDE_DIRS})
