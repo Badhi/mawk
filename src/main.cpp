@@ -14,9 +14,9 @@ int main(int argc, char ** argv)
     po::options_description desc("Allowed options");
 
     desc.add_options()
-        ("field-separator,F", po::value<char>()->default_value(' '), "Field separator")
-        ("file,f", po::value<std::string>(), "Script name")
-        ("val,v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script")
+        ("F", po::value<char>()->default_value(' '), "Field separator")
+        ("f", po::value<std::string>()->default_value(""), "Script name")
+        ("v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script")
         ("help", "help")
         ;
 
@@ -34,8 +34,6 @@ int main(int argc, char ** argv)
         }
 
         fieldSeparator = vm["F"].as<char>();
-
-        LOG("Field seperator : " <<  fieldSeparator);
 
         std::string script_file_name = vm["f"].as<std::string>();
 

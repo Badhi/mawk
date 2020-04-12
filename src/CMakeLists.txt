@@ -9,7 +9,9 @@ find_package(Boost 1.72.0 REQUIRED COMPONENTS
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-add_library(mawk_core parser.cpp)
+add_library(mawk_core 
+        parser.cpp
+        RunArgs.cpp)
 
 add_executable(mawk
     main.cpp
