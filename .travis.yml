@@ -1,0 +1,13 @@
+language : c++
+
+addons :
+    apt :
+        packages :
+            g++-9
+
+script :
+    - cd src/
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make -j4
