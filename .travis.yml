@@ -8,7 +8,7 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - g++-8
-            - boost1.72
+            - boost1.67
 script :
     - cd src/
     - mkdir build
