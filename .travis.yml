@@ -7,8 +7,8 @@ addons:
             - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
         packages:
-            - g++-6
-            - boost1.67
+            - g++-8
+            - boost1.72
 script :
     - cd src/
     - mkdir build
