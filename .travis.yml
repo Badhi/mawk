@@ -1,14 +1,19 @@
 language : c++
+dist: bionic
 
 addons:
     apt:
         update: true
         sources:
-            - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
         packages:
-            - g++-8
-            - boost1.67
+            - g++-9
+install:
+    - wget https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
+    - tar xvf boost_1_72_0.tar.gz
+    - cd boost_1_72_0
+    - sudo ./b2 --with-program_options install
+
 script :
     - cd src/
     - mkdir build
