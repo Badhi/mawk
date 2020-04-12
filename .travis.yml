@@ -13,7 +13,8 @@ install:
     - tar xf boost_1_72_0.tar.gz
     - cd boost_1_72_0
     - ./bootstrap.sh
-    - sudo ./b2 --with-program_options install
+    - sudo ./b2 -d0 --with-program_options install
+    - cd -
 
 script :
     - cd src/
