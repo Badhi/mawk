@@ -21,7 +21,7 @@ install:
     - cd build
     - cmake .. 
     - sudo make -j`nproc` install
-    - cd -
+    - cd ../../
 
 script :
     - mkdir build
