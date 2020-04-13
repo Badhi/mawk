@@ -12,9 +12,8 @@ enum class RunArgOptions {
     END
 };
 
-template<typename T>
-std::function<T(const T&)> no_op_function(){
-    return [](const T& val) {return val;} ;
+std::function<boost::any(const boost::any&)> no_op_function(){
+    return [](const boost::any& val) {return val;} ;
 }
 
 class RunArgs
@@ -27,26 +26,24 @@ public:
                                     const std::string & desc, RunArgOptions option) noexcept;
     template<typename T>
     const T & operator[](RunArgOptions & key){
-        return boost::any_cast<const T&>(m_value_store[m_name_mapping.at(static_cast<unsigned int>(key))]);
+        return boost::any_cast<const T&>(m_value_store[key]);
     }
     
-    template<typename T>
     RunArgs& operator()(const std::string &name, const po::value_semantic *val, 
                             const std::string &desc, RunArgOptions option, 
                             RunArgOptions dependOption = RunArgOptions::END, 
-                            std::function<void(const T&)> converter = no_op_function<T>()) noexcept
-    {
-        m_desc.add_options()(name.c_str(), val, desc.c_str());
-        m_name_mapping.at(static_cast<unsigned int>(option)) = name;
-        return *this;
-    }
+                            std::function<boost::any(const boost::any &)> converter = no_op_function()) noexcept;
+    
 private:
-    po::variables_map m_vm;
-    po::options_description m_desc;
+    po::variables_map                                       m_vm;
+    po::options_description                                 m_desc;
 
-    std::vector<std::string> m_name_mapping;
-    std::unordered_map<std::string, boost::any>  m_value_store;
+    std::vector<std::string>                                m_name_mapping;
+    std::unordered_map<RunArgOptions, boost::any>           m_value_store;
+    std::unordered_map<RunArgOptions, 
+        std::pair<RunArgOptions, 
+        std::function<boost::any(const boost::any &)>> >    m_dependency_mappings;
 
-    const int m_argc;
-    const char ** m_argv;
+    const int                                               m_argc;
+    const char **                                           m_argv;
 };
