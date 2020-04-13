@@ -28,3 +28,4 @@ script :
     - cd build
     - cmake ..
     - make -j`nproc`
+    - ./test/mawk_test
