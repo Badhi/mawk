@@ -15,10 +15,15 @@ install:
     - ./bootstrap.sh
     - sudo ./b2 -d0 --with-program_options install
     - cd -
+    - git clone --depth=1 --single-branch https://github.com/google/googletest.git
+    - cd googletest
+    - mkdir build
+    - cd build
+    - cmake .. 
+    - sudo make -j$(nproc) install
 
 script :
-    - cd src/
     - mkdir build
     - cd build
     - cmake ..
-    - make -j4
+    - make -j$(nproc)
