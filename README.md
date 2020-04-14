@@ -1,1 +1,1 @@
-[![Build Status](https://travis-ci.com/Badhi/mawk.svg?token=jD2BUNz8i8Pm4qCpC4vQ&branch=master)](https://travis-ci.com/Badhi/mawk)
+[![Build Status](https://travis-ci.com/Badhi/mawk.svg?token=jD2BUNz8i8Pm4qCpC4vQ&branch=master)](https://travis-ci.com/Badhi/mawk)    [![Coverage Status](https://coveralls.io/repos/github/Badhi/mawk/badge.svg)](https://coveralls.io/github/Badhi/mawk)
