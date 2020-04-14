@@ -8,6 +8,10 @@ addons:
             - ubuntu-toolchain-r-test
         packages:
             - g++-9
+
+before_install:
+    - pip install --user cpp-coveralls
+
 install:
     - wget https://dl.bintray.com/boostorg/release/1.72.0/source/boost_1_72_0.tar.gz
     - tar xf boost_1_72_0.tar.gz
@@ -26,6 +30,9 @@ install:
 script :
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake .. -DCOVERAGE=True
     - make -j`nproc`
     - ./test/mawk_test
+
+after_success:
+    - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
