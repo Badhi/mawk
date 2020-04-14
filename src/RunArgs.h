@@ -33,9 +33,8 @@ public:
 
     RunArgs & operator()(const std::string & name, const po::value_semantic * val, 
                                     const std::string & desc, RunArgOptions option) noexcept;
-    template<typename T>
-    const T & operator[](RunArgOptions & key){
-        return boost::any_cast<const T&>(m_value_store[key]);
+    const boost::any & operator[](const RunArgOptions & key){
+        return m_value_store[key];
     }
     
     RunArgs& operator()(const std::string &name, const po::value_semantic *val, 

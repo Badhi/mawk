@@ -27,7 +27,11 @@ RunArgs& RunArgs::populate_parameter(const std::string &name, const po::value_se
                             RunArgOptions dependOption /*= RunArgOptions::END*/, 
                             std::function<boost::any(const boost::any &)> converter /*= no_op_function()*/) noexcept
 {
-    m_desc.add_options()(name.c_str(), val, desc.c_str());
+    if (val == nullptr)
+        m_desc.add_options()(name.c_str(), desc.c_str());
+    else
+        m_desc.add_options()(name.c_str(), val, desc.c_str());
+
     m_name_mapping.at(static_cast<unsigned int>(option)) = name;
     if ( dependOption != RunArgOptions::END ) {
         m_dependency_mappings[option] = std::make_pair(dependOption, converter);
