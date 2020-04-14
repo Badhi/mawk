@@ -21,5 +21,5 @@ TEST_F(TestRunArgs, default_args)
 
     RunArgs r(args.size(), args.data());
 
-    r.parse_args();
+    r.parse_args(false);
 }
