@@ -33,6 +33,7 @@ script :
     - cmake .. -DCOVERAGE=True
     - make -j`nproc`
     - ./test/mawk_test
+    - cd -
 
 after_success:
     - coveralls --gcov-options '\-lp'
