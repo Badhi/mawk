@@ -18,16 +18,36 @@ RunArgs& RunArgs::operator()(const std::string &name, const po::value_semantic *
                             RunArgOptions dependOption /*= RunArgOptions::END*/, 
                             std::function<boost::any(const boost::any &)> converter /*= no_op_function()*/) noexcept
 {
-        m_desc.add_options()(name.c_str(), val, desc.c_str());
-        m_name_mapping.at(static_cast<unsigned int>(option)) = name;
-        if ( dependOption != RunArgOptions::END ) {
-            m_dependency_mappings[option] = std::make_pair(dependOption, converter);
-        }
-        return *this;
+    populate_parameter(name, val, desc, option, dependOption, converter);
+    return *this;
 }
 
-void RunArgs::parse_args()
+RunArgs& RunArgs::populate_parameter(const std::string &name, const po::value_semantic *val, 
+                            const std::string &desc, RunArgOptions option, 
+                            RunArgOptions dependOption /*= RunArgOptions::END*/, 
+                            std::function<boost::any(const boost::any &)> converter /*= no_op_function()*/) noexcept
 {
+    m_desc.add_options()(name.c_str(), val, desc.c_str());
+    m_name_mapping.at(static_cast<unsigned int>(option)) = name;
+    if ( dependOption != RunArgOptions::END ) {
+        m_dependency_mappings[option] = std::make_pair(dependOption, converter);
+    }
+    return *this;
+}
+
+void RunArgs::setup_enum_values() noexcept
+{
+    populate_parameter("F", po::value<char>()->default_value(' '), "Field Separator", RunArgOptions::FIELD_SEPARATOR);
+    populate_parameter("f", po::value<std::string>()->default_value(""), "Script name", RunArgOptions::SCRIPT_FILE);
+    populate_parameter("v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script", RunArgOptions::VAR);
+    populate_parameter("help", nullptr, "help", RunArgOptions::HELP);
+}
+
+void RunArgs::parse_args(bool do_inbuild_setup /* = true */)
+{
+    if (do_inbuild_setup) 
+        setup_enum_values();
+
     po::store(po::parse_command_line(m_argc, m_argv, m_desc), m_vm);
     po::notify(m_vm);
 
