@@ -16,7 +16,7 @@ RunArgs::RunArgs(const int argc, const char ** argv) noexcept :
 RunArgs& RunArgs::operator()(const std::string &name, const po::value_semantic *val, 
                             const std::string &desc, RunArgOptions option, 
                             RunArgOptions dependOption /*= RunArgOptions::END*/, 
-                            std::function<boost::any(const boost::any &)> converter /*= no_op_function()*/) noexcept
+                            std::function<po::variable_value(const po::variable_value &)> converter /*= no_op_function()*/) noexcept
 {
     populate_parameter(name, val, desc, option, dependOption, converter);
     return *this;
@@ -25,14 +25,15 @@ RunArgs& RunArgs::operator()(const std::string &name, const po::value_semantic *
 RunArgs& RunArgs::populate_parameter(const std::string &name, const po::value_semantic *val, 
                             const std::string &desc, RunArgOptions option, 
                             RunArgOptions dependOption /*= RunArgOptions::END*/, 
-                            std::function<boost::any(const boost::any &)> converter /*= no_op_function()*/) noexcept
+                            std::function<po::variable_value(const po::variable_value &)> converter /*= no_op_function()*/) noexcept
 {
     if (val == nullptr)
         m_desc.add_options()(name.c_str(), desc.c_str());
     else
         m_desc.add_options()(name.c_str(), val, desc.c_str());
 
-    m_name_mapping.at(static_cast<unsigned int>(option)) = name;
+    m_name_mapping.at(static_cast<unsigned int>(option)) = name.substr(0, name.find_last_of(','));
+
     if ( dependOption != RunArgOptions::END ) {
         m_dependency_mappings[option] = std::make_pair(dependOption, converter);
     }
@@ -41,7 +42,7 @@ RunArgs& RunArgs::populate_parameter(const std::string &name, const po::value_se
 
 void RunArgs::setup_enum_values() noexcept
 {
-    populate_parameter("F", po::value<char>()->default_value(' '), "Field Separator", RunArgOptions::FIELD_SEPARATOR);
+    populate_parameter("field-separator,F", po::value<char>()->default_value(' '), "Field Separator", RunArgOptions::FIELD_SEPARATOR);
     populate_parameter("f", po::value<std::string>()->default_value(""), "Script name", RunArgOptions::SCRIPT_FILE);
     populate_parameter("v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script", RunArgOptions::VAR);
     populate_parameter("help", nullptr, "help", RunArgOptions::HELP);
@@ -64,7 +65,7 @@ void RunArgs::parse_args(bool do_inbuild_setup /* = true */)
         if (m_name_mapping[i].empty()) continue;
         auto enum_val = static_cast<const RunArgOptions>(i);
 
-        auto store_value = m_vm[m_name_mapping.at(i)];
+        const auto & store_value = m_vm[m_name_mapping.at(i)];
         m_value_store[enum_val] = store_value;
 
         auto dependency_info_it = m_dependency_mappings.find(enum_val);

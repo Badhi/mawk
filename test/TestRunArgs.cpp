@@ -20,7 +20,7 @@ TEST_F(TestRunArgs, default_args)
     std::vector<const char*> args({"mawk"});
 
     RunArgs r(args.size(), args.data());
-
+    
     r.parse_args(true);
 }
 
@@ -32,13 +32,13 @@ TEST_F(TestRunArgs, default_args_default_values)
 
     r.parse_args(true);
 
-    EXPECT_EQ(' ', boost::any_cast<char>(r[RunArgOptions::FIELD_SEPARATOR]));
+    EXPECT_EQ(' ', r[RunArgOptions::FIELD_SEPARATOR].as<char>());
 
 }
 
 TEST_F(TestRunArgs, default_args_with_field_sepearator)
 {
-    std::vector<const char*> args({"mawk", "-F", "','"});
+    std::vector<const char*> args({"mawk", "-F", ","});
 
     RunArgs r(args.size(), args.data());
 
