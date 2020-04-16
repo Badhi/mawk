@@ -4,9 +4,18 @@
 #include <string>
 #include <vector>
 
+#include <exception>
+
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
+
+class RunArgNoFoundException : public std::runtime_error
+{
+public:
+    RunArgNoFoundException(const std::string & error_msg) : std::runtime_error(error_msg) {}
+};
+
 
 enum class RunArgOptions {
     FIELD_SEPARATOR = 0,
@@ -21,6 +30,23 @@ enum class RunArgOptions {
     END
 };
 
+inline std::ostream & operator<<(std::ostream & os,  const RunArgOptions  & runarg) {
+    switch(runarg) {
+        case RunArgOptions::FIELD_SEPARATOR : return os << "FIELD_SEPARATOR";
+        case RunArgOptions::SCRIPT_FILE : return os << "SCRIPT_FILE ";
+        case RunArgOptions::VAR : return os << "VAR";
+        case RunArgOptions::BYTE : return os << "BYTE";
+        case RunArgOptions::TRADITIONAL: return os << "TRADITIONA";
+        case RunArgOptions::DUMP_VARIABLES : return os << "DUMP_VARIABLES";
+        case RunArgOptions::EXEC : return os << "EXEC";
+        case RunArgOptions::HELP : return os << "HELP";
+        case RunArgOptions::INCLUDE_FILES : return os << "INCLUDE_FILES";
+        case RunArgOptions::END : return os << "END";
+        default : return os << "UNDEFINED"; 
+    }
+    return os;
+}
+
 inline std::function<po::variable_value(const po::variable_value&)> no_op_function(){
     return [](const po::variable_value& val) {return val;} ;
 }
@@ -34,7 +60,12 @@ public:
     RunArgs & operator()(const std::string & name, const po::value_semantic * val, 
                                     const std::string & desc, RunArgOptions option) noexcept;
     const po::variable_value & operator[](const RunArgOptions & key){
-        return m_value_store[key];
+        try {
+            return m_value_store.at(key);
+        } catch(std::exception & v) {
+            std::stringstream s; s << "Cannot find the Run Arg for " << key;
+            throw RunArgNoFoundException(s.str());
+        }
     }
     
     RunArgs& operator()(const std::string &name, const po::value_semantic *val, 

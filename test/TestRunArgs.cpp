@@ -42,5 +42,33 @@ TEST_F(TestRunArgs, default_args_with_field_sepearator)
 
     RunArgs r(args.size(), args.data());
 
-    r.parse_args(true);
+    r.parse_args();
+    EXPECT_EQ(',', r[RunArgOptions::FIELD_SEPARATOR].as<char>());
+}
+
+TEST_F(TestRunArgs, default_args_multi_values)
+{
+    std::vector<const char*> args({"mawk", "-v", "a=5", "-v", "b=3", "-v", "c=8"});
+    
+    RunArgs r(args.size(), args.data());
+
+    r.parse_args();
+
+    auto a = r[RunArgOptions::VAR].as<std::vector<std::string>>();
+
+    EXPECT_EQ(3u, a.size());
+
+    EXPECT_EQ("a=5", a[0]);
+    EXPECT_EQ("b=3", a[1]);
+    EXPECT_EQ("c=8", a[2]);
+
+}
+
+TEST_F(TestRunArgs, help_death)
+{
+    std::vector<const char*> args({"mawk", "--help"});
+
+    RunArgs r(args.size(), args.data());
+
+    EXPECT_DEATH(r.parse_args(), ".*");
 }

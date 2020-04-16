@@ -43,8 +43,8 @@ RunArgs& RunArgs::populate_parameter(const std::string &name, const po::value_se
 void RunArgs::setup_enum_values() noexcept
 {
     populate_parameter("field-separator,F", po::value<char>()->default_value(' '), "Field Separator", RunArgOptions::FIELD_SEPARATOR);
-    populate_parameter("f", po::value<std::string>()->default_value(""), "Script name", RunArgOptions::SCRIPT_FILE);
-    populate_parameter("v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script", RunArgOptions::VAR);
+    populate_parameter("file,f", po::value<std::string>()->default_value(""), "Script name", RunArgOptions::SCRIPT_FILE);
+    populate_parameter("assign,v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script", RunArgOptions::VAR);
     populate_parameter("help", nullptr, "help", RunArgOptions::HELP);
 }
 
