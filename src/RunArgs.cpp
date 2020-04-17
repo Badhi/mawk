@@ -4,6 +4,7 @@
 #include "RunArgs.h"
 
 RunArgs::RunArgs(const int argc, const char ** argv) noexcept : 
+                m_parsing_completed(false),
                 m_desc("Allowed Options"), 
                 m_name_mapping(static_cast<unsigned int>(RunArgOptions::END)),
                 m_argc(argc), m_argv(argv)
@@ -12,17 +13,20 @@ RunArgs::RunArgs(const int argc, const char ** argv) noexcept :
     assert(argv && "Argument container cannot be null");
 }
 
-
-RunArgs& RunArgs::operator()(const std::string &name, const po::value_semantic *val, 
-                            const std::string &desc, RunArgOptions option, 
-                            RunArgOptions dependOption /*= RunArgOptions::END*/, 
-                            std::function<po::variable_value(const po::variable_value &)> converter /*= no_op_function()*/) noexcept
+const po::variable_value & RunArgs::operator[](const RunArgOptions & key)
 {
-    populate_parameter(name, val, desc, option, dependOption, converter);
-    return *this;
+    if (!m_parsing_completed) {
+        throw RunArgNoFoundException("Please do parse_args before getting value");
+    }
+    try {
+        return m_value_store.at(key);
+    } catch(std::exception & v) {
+        std::stringstream s; s << "Cannot find the Run Arg for " << key;
+        throw RunArgNoFoundException(s.str());
+    }
 }
 
-RunArgs& RunArgs::populate_parameter(const std::string &name, const po::value_semantic *val, 
+RunArgs& RunArgs::operator()(const std::string &name, const po::value_semantic *val, 
                             const std::string &desc, RunArgOptions option, 
                             RunArgOptions dependOption /*= RunArgOptions::END*/, 
                             std::function<po::variable_value(const po::variable_value &)> converter /*= no_op_function()*/) noexcept
@@ -40,12 +44,13 @@ RunArgs& RunArgs::populate_parameter(const std::string &name, const po::value_se
     return *this;
 }
 
+
 void RunArgs::setup_enum_values() noexcept
 {
-    populate_parameter("field-separator,F", po::value<char>()->default_value(' '), "Field Separator", RunArgOptions::FIELD_SEPARATOR);
-    populate_parameter("file,f", po::value<std::string>()->default_value(""), "Script name", RunArgOptions::SCRIPT_FILE);
-    populate_parameter("assign,v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script", RunArgOptions::VAR);
-    populate_parameter("help", nullptr, "help", RunArgOptions::HELP);
+    (*this)("field-separator,F", po::value<char>()->default_value(' '), "Field Separator", RunArgOptions::FIELD_SEPARATOR);
+    (*this)("file,f", po::value<std::string>()->default_value(""), "Script name", RunArgOptions::SCRIPT_FILE);
+    (*this)("assign,v", po::value<std::vector<std::string>>()->multitoken(), "Followed with var=value, assigns value to var in the script", RunArgOptions::VAR);
+    (*this)("help", nullptr, "help", RunArgOptions::HELP);
 }
 
 void RunArgs::parse_args(bool do_inbuild_setup /* = true */)
@@ -75,4 +80,6 @@ void RunArgs::parse_args(bool do_inbuild_setup /* = true */)
             m_value_store[dependent] = converter(store_value);
         }
     }
+
+    m_parsing_completed = true;
 }

@@ -27,6 +27,7 @@ enum class RunArgOptions {
     EXEC,
     HELP,
     INCLUDE_FILES,
+    PHRASE,
     END
 };
 
@@ -36,11 +37,12 @@ inline std::ostream & operator<<(std::ostream & os,  const RunArgOptions  & runa
         case RunArgOptions::SCRIPT_FILE : return os << "SCRIPT_FILE ";
         case RunArgOptions::VAR : return os << "VAR";
         case RunArgOptions::BYTE : return os << "BYTE";
-        case RunArgOptions::TRADITIONAL: return os << "TRADITIONA";
+        case RunArgOptions::TRADITIONAL: return os << "TRADITIONAL";
         case RunArgOptions::DUMP_VARIABLES : return os << "DUMP_VARIABLES";
         case RunArgOptions::EXEC : return os << "EXEC";
         case RunArgOptions::HELP : return os << "HELP";
         case RunArgOptions::INCLUDE_FILES : return os << "INCLUDE_FILES";
+        case RunArgOptions::PHRASE: return os << "PHRASE";
         case RunArgOptions::END : return os << "END";
         default : return os << "UNDEFINED"; 
     }
@@ -57,16 +59,7 @@ public:
     RunArgs(const int argc, const char ** argv) noexcept;
     void parse_args( bool do_inbuild_setup = true ); 
 
-    RunArgs & operator()(const std::string & name, const po::value_semantic * val, 
-                                    const std::string & desc, RunArgOptions option) noexcept;
-    const po::variable_value & operator[](const RunArgOptions & key){
-        try {
-            return m_value_store.at(key);
-        } catch(std::exception & v) {
-            std::stringstream s; s << "Cannot find the Run Arg for " << key;
-            throw RunArgNoFoundException(s.str());
-        }
-    }
+    const po::variable_value & operator[](const RunArgOptions & key);
     
     RunArgs& operator()(const std::string &name, const po::value_semantic *val, 
                             const std::string &desc, RunArgOptions option, 
@@ -75,11 +68,8 @@ public:
     
 private:
     void setup_enum_values() noexcept;
-    RunArgs& populate_parameter(const std::string &name, const po::value_semantic *val, 
-                            const std::string &desc, RunArgOptions option, 
-                            RunArgOptions dependOption = RunArgOptions::END, 
-                            std::function<po::variable_value(const po::variable_value &)> converter = no_op_function()) noexcept;
 
+    bool                                                    m_parsing_completed;
     po::variables_map                                       m_vm;
     po::options_description                                 m_desc;
 
