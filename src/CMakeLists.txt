@@ -12,11 +12,14 @@ if (COVERAGE)
     set(CMAKE_CXX_FLAGS "-fprofile-arcs -ftest-coverage")
 endif()
 
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -DBOOST_VARIANT_USE_RELAXED_GET_BY_DEFAULT")
+
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(mawk_core 
-        parser.cpp
-        RunArgs.cpp)
+        MawkParser.cpp
+        RunArgs.cpp
+        example.cpp)
 
 add_executable(mawk
     main.cpp

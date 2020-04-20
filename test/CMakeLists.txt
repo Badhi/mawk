@@ -19,7 +19,8 @@ link_directories( /usr/local/lib/ )
 
 add_executable(mawk_test
     main.cpp
-    TestRunArgs.cpp)
+    TestRunArgs.cpp
+    TestMawkParser.cpp)
 
 target_link_libraries(mawk_test
         Boost::program_options
