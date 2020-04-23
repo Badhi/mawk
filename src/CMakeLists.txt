@@ -19,7 +19,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 add_library(mawk_core 
         MawkParser.cpp
         RunArgs.cpp
-        example.cpp)
+        )
 
 add_executable(mawk
     main.cpp
