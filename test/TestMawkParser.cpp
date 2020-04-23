@@ -2,12 +2,27 @@
 
 #include "MawkParser.h"
 
-
-TEST(TestMawkParser, setup)
+class TestMawkParser : public ::testing::Test
 {
+public:
+    void SetUp(){
+
+    }
+    bool parse(std::string & str) { return p.parse_phrase(str); }
     MawkParser p;
+};
 
-    std::string phrase = "BEGIN{ }";
+std::vector<std::string> phrases = 
+    {
+        "BEGIN { }",
+        "END { }", 
+        "hello{ }", 
+        "132{ }", 
+        "/ab/{ }"
+    };
 
-    p.parse_phrase(phrase);
+TEST_F(TestMawkParser, setup)
+{
+    for(auto str : phrases)
+        ASSERT_TRUE(parse(str)) << str;
 }

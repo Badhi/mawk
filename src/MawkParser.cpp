@@ -2,6 +2,7 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/lex_lexertl.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -22,13 +23,14 @@ struct AwkLexer : lex::lexer<Lexer>
     {
         // define the tokens to match
         identifier = "[a-zA-Z_][a-zA-Z0-9_]*";
+        ere = "\\/[a-zA-Z0-9.${}+*]+\\/";
         constant = "[0-9]+";
-        _print =  "print";
+        print =  "print";
         Begin = "BEGIN";
         End = "END";
 
         // associate the tokens and the token set with the lexer
-        this->self = lex::token_def<>('{') | '}' | constant | _print | Begin | End;
+        this->self = lex::token_def<>('{') | '}' | print | Begin | End | ere | constant | identifier | '.';
 
         // define the whitespace to ignore (spaces, tabs, newlines and C-style 
         // comments)
@@ -36,6 +38,8 @@ struct AwkLexer : lex::lexer<Lexer>
             =   lex::token_def<>("[ \\t\\n]+") 
             |   "\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"
             ;
+
+//        this->self += lex::string("."); // Catch all for error handling
     }
 
     //[example4_token_def
@@ -53,8 +57,8 @@ struct AwkLexer : lex::lexer<Lexer>
     // possible. Moreover, token instances are constructed once by the lexer
     // library. From this point on tokens are passed by reference only, 
     // avoiding them being copied around.
-    lex::token_def<> _print, Begin, End;
-    lex::token_def<std::string> identifier;
+    lex::token_def<> print, Begin, End;
+    lex::token_def<std::string> identifier, ere;
     lex::token_def<unsigned int> constant;
     //]
 };
@@ -76,27 +80,57 @@ struct AwkParser : qi::grammar<Iterator, qi::in_state_skipper<Lexer> >
                 ;
 
             block
-                =    pattern >> action 
+                =    -(pattern) >> action 
                 ;
 
-            action = lex::token_def<>('{') >> '}';
+            action =   boost::spirit::ascii::char_('{') >> '}'
+                ;
 
             pattern = tok.Begin 
-                    | tok.End
+                | tok.End
+                | expr
                     ;
+
+            expr = non_unary_expr
+                | unary_expr
+                ;
+    
+            unary_expr = '+' >> expr
+                | '-' >> expr
+                ; 
+            non_unary_expr = tok.constant
+                | tok.identifier
+                | tok.ere
+                ;
+            program.name("Program");
+            block.name("Block");
+            action.name("Action");
+            pattern.name("Pattern");
+
+            boost::spirit::qi::on_error<boost::spirit::qi::fail>
+            (
+                program,
+                std::cerr 
+                << boost::phoenix::val("ERROR : Expecting ")
+                << boost::spirit::_4
+                << boost::phoenix::val("here : \"")
+                << boost::phoenix::construct<std::string>(boost::spirit::_3, boost::spirit::_2)
+                << boost::phoenix::val("\"\n")
+            );
+
+            debug(program);
 
         }
 
     typedef boost::variant<unsigned int, std::string> expression_type;
 
     qi::rule<Iterator, qi::in_state_skipper<Lexer> > program, block;
-    qi::rule<Iterator, qi::in_state_skipper<Lexer> > pattern, action;
-
-    //  the expression is the only rule having a return value
-    qi::rule<Iterator, expression_type(), qi::in_state_skipper<Lexer> >  expression;
+    qi::rule<Iterator, qi::in_state_skipper<Lexer> >  action, pattern, expr, 
+                non_unary_expr,
+                unary_expr;
 };
 
-void MawkParser::parse_phrase(std::string & phrase)
+bool MawkParser::parse_phrase(std::string & phrase)
 {
     // iterator type used to expose the underlying input stream
     typedef std::string::iterator base_iterator_type;
@@ -149,18 +183,5 @@ void MawkParser::parse_phrase(std::string & phrase)
     // state for the duration of skipping whitespace.
     bool r = qi::phrase_parse(iter, end, calc, qi::in_state("WS")[tokens.self]);
 
-    if (r && iter == end)
-    {
-        std::cout << "-------------------------\n";
-        std::cout << "Parsing succeeded\n";
-        std::cout << "-------------------------\n";
-    }
-    else
-    {
-        std::cout << "-------------------------\n";
-        std::cout << "Parsing failed\n";
-        std::cout << "-------------------------\n";
-    }
-
-    std::cout << "Bye... :-) \n\n";
+    return (r && iter == end);
 }

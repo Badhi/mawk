@@ -5,7 +5,7 @@
 class MawkParser 
 {
 public:
-    void parse_phrase(std::string & phrase);
+    bool parse_phrase(std::string & phrase);
 private:
 
 };
